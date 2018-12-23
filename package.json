@@ -1,0 +1,12 @@
+{
+    "name": "serverless-plugin-typescript-express",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "chokidar": "^2.0.4",
+        "typescript": "^3.2.2"
+    }
+}
