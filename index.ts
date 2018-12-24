@@ -1,21 +1,21 @@
-'use strict';
-
-const path = require("path");
-const fs = require("fs");
-const chokidar = require("chokidar");
+import * as path from "path";
+import * as fs from "fs";
+import chokidar from "chokidar";
+import { Serverless, Options } from "./types";
 const TypeScript = require("./typescript");
 const tsConfigBuild = require("./tsBuildFile");
-const inDirectory = 'src';
-const tsConfigName = 'tsconfig.json';
-
 class ServerlessPluginTypescriptExpress {
-  constructor(serverless, options) {
-    this.serverless = serverless;
-    this.options = options;
 
-    console.log(this.serverless);
-    // console.log(this.options);
+    private inDirectory = 'src';
+    private tsConfigName = 'tsconfig.json';
+    private serverless: Serverless;
+    private applicationPath: string;
+    private files: Array<string>;
+
+  constructor(serverless: Serverless, options: Options) {
+    this.serverless = serverless;
     this.buildVariables();
+
     if (this.verifyCommands()) {
       this.watchFiles(this.files);
     }
@@ -63,7 +63,7 @@ class ServerlessPluginTypescriptExpress {
     await this.ts.run(this.files, options);
   }
 
-  listPaths(dir, filelist = []) {
+  listPaths(dir: string, filelist: Array<string> = []) {
     const files = fs.readdirSync(dir);
 
     files.forEach((file) => {
