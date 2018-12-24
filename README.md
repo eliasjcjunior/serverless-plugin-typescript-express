@@ -10,8 +10,6 @@
 
 ## Instalation and use
 
-## Install
-
 ```sh
 yarn add --dev serverless-plugin-typescript-express
 ```
