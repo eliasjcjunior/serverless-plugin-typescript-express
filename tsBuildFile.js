@@ -9,28 +9,30 @@ const compilerOptionsDefault = {
   sourceMap: true,
   experimentalDecorators: true,
   emitDecoratorMetadata: true,
-  isolatedModules: false
+  isolatedModules: false,
+  compilerOptions: {}
 }
 const tsConfigBuild = (options = compilerOptionsDefault) => {
-
   const compilerOptions = {
-    ...options,
+    ...options.compilerOptions,
     compilerOptions: {
-      ...options,
+      ...options.compilerOptions,
       lib: returnWithoutDuplicate(libsDefault, options.compilerOptions.lib || [])
     }
   }
 
+  delete compilerOptions.lib;
+
   return {
     ...compilerOptions,
-    include: returnWithoutDuplicate(includeDefault, options.include = []),
-    exclude: returnWithoutDuplicate(excludeDefault, options.exclude = []),
+    include: returnWithoutDuplicate(includeDefault, options.include),
+    exclude: returnWithoutDuplicate(excludeDefault, options.exclude),
     outDir: compilerOptions.outDir || 'dist',
     listEmittedFiles: true,
   }
 }
 
-const returnWithoutDuplicate = (array1, array2) => {
+const returnWithoutDuplicate = (array1, array2 = []) => {
   return new Set(array1.concat(array2)).toJSON();
 }
 
