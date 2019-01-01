@@ -1,7 +1,7 @@
 
 const includeDefault = ["src/**/*"];
 const excludeDefault = ["node_modules"];
-
+const libsDefault = ["es6","dom"];
 const compilerOptionsDefault = {
   target: "es6",
   module: "commonjs",
@@ -9,24 +9,24 @@ const compilerOptionsDefault = {
   sourceMap: true,
   experimentalDecorators: true,
   emitDecoratorMetadata: true,
-  isolatedModules: false,
-  lib: ["es6","dom"]
+  isolatedModules: false
 }
-const tsConfigBuild = (options) => {
-  let compilerOptions = compilerOptionsDefault;
+const tsConfigBuild = (options = compilerOptionsDefault) => {
 
-  if (options.compilerOptions) {
-    compilerOptions = {
-      lib: returnWithoutDuplicate(compilerOptions.lib, options.compilerOptions.lib || []),
-      ...compilerOptions,
-      ...options.compilerOptions
+  const compilerOptions = {
+    ...options,
+    compilerOptions: {
+      ...options,
+      lib: returnWithoutDuplicate(libsDefault, options.compilerOptions.lib || [])
     }
   }
+
   return {
-    compilerOptions,
+    ...compilerOptions,
     include: returnWithoutDuplicate(includeDefault, options.include = []),
     exclude: returnWithoutDuplicate(excludeDefault, options.exclude = []),
-    outDir: compilerOptions.outDir || 'dist'
+    outDir: compilerOptions.outDir || 'dist',
+    listEmittedFiles: true,
   }
 }
 

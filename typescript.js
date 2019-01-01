@@ -2,17 +2,16 @@ const ts = require('typescript');
 
 module.exports = class Typescript {
 
-    async run(files, options = tsConfigDefault()) {
-        options.listEmittedFiles = true;
+    async run(files, options) {
         const program = ts.createProgram(files, options);
 
-        const emitResult = program.emit()
+        const emitResult = program.emit();
   
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
       
         allDiagnostics.forEach(diagnostic => {
           if (!diagnostic.file) {
-            console.log(diagnostic)
+            console.log(diagnostic);
           }
           const {line, character} = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
           const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
