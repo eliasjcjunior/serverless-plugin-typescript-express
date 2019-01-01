@@ -1,7 +1,7 @@
 
 const includeDefault = ["src/**/*"];
 const excludeDefault = ["node_modules"];
-
+const libsDefault = ["es6","dom"];
 const compilerOptionsDefault = {
   target: "es6",
   module: "commonjs",
@@ -10,27 +10,29 @@ const compilerOptionsDefault = {
   experimentalDecorators: true,
   emitDecoratorMetadata: true,
   isolatedModules: false,
-  lib: ["es6","dom"]
+  compilerOptions: {}
 }
-const tsConfigBuild = (options) => {
-  let compilerOptions = compilerOptionsDefault;
-
-  if (options.compilerOptions) {
-    compilerOptions = {
-      lib: returnWithoutDuplicate(compilerOptions.lib, options.compilerOptions.lib || []),
-      ...compilerOptions,
-      ...options.compilerOptions
+const tsConfigBuild = (options = compilerOptionsDefault) => {
+  const compilerOptions = {
+    ...options.compilerOptions,
+    compilerOptions: {
+      ...options.compilerOptions,
+      lib: returnWithoutDuplicate(libsDefault, options.compilerOptions.lib || [])
     }
   }
+
+  delete compilerOptions.lib;
+
   return {
-    compilerOptions,
-    include: returnWithoutDuplicate(includeDefault, options.include = []),
-    exclude: returnWithoutDuplicate(excludeDefault, options.exclude = []),
-    outDir: compilerOptions.outDir || 'dist'
+    ...compilerOptions,
+    include: returnWithoutDuplicate(includeDefault, options.include),
+    exclude: returnWithoutDuplicate(excludeDefault, options.exclude),
+    outDir: compilerOptions.outDir || 'dist',
+    listEmittedFiles: true,
   }
 }
 
-const returnWithoutDuplicate = (array1, array2) => {
+const returnWithoutDuplicate = (array1, array2 = []) => {
   return new Set(array1.concat(array2)).toJSON();
 }
 

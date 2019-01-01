@@ -8,7 +8,7 @@ const tsConfigBuild = require("./tsBuildFile");
 const inDirectory = 'src';
 const tsConfigName = 'tsconfig.json';
 
-class ServerlessPlugin {
+class ServerlessPluginTypescriptExpress {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
@@ -76,4 +76,4 @@ class ServerlessPlugin {
   };
 }
 
-module.exports = ServerlessPlugin;
+module.exports = ServerlessPluginTypescriptExpress;
