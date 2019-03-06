@@ -3,61 +3,67 @@
 const path = require("path");
 const fs = require("fs");
 const chokidar = require("chokidar");
-const TypeScript = require("./typescript");
-const tsConfigBuild = require("./tsBuildFile");
 const inDirectory = 'src';
-const tsConfigName = 'tsconfig.json';
+const exec = require('child_process').exec;
+
+const execPromise = (command) => {
+  return new Promise((resolve, reject) => {
+    console.log(command);
+    exec(command, (error, stdout, stderr) => {
+      if (stderr) {
+        return reject(stderr);
+      }
+      return resolve();
+    })
+  });
+}
 
 class ServerlessPluginTypescriptExpress {
   constructor(serverless, options) {
     this.serverless = serverless;
     this.options = options;
-    this.buildVariables();
-    if (this.verifyCommands()) {
-      this.watchFiles(this.files);
+
+    this.hooks = {
+      'before:offline:start:init': this.start.bind(this),
+      'before:package:createDeploymentArtifacts': this.changeFunctions.bind(this)
     }
-    this.changeFunctions(this.tsConfig.outDir);
-    this.runBuild(this.tsConfig);
   }
 
-  buildVariables() {
-    this.ts = new TypeScript();
-    this.applicationPath = this.serverless.config.servicePath;
-    this.files = this.listPaths(path.join(this.applicationPath, inDirectory));
-    const tsConfigFile = JSON.parse(fs.readFileSync(path.join(this.applicationPath, tsConfigName), 'utf8'));
-    this.tsConfig = tsConfigBuild(tsConfigFile);
+  async start() {
+    const appPath = this.serverless.config.servicePath;
+    const files = this.listPaths(path.join(appPath, inDirectory));
+    this.tsConfigPath = `${appPath}\\tsconfig.json`;
+    this.watchFiles(files);
+    this.changeFunctions();
+    await this.runBuild(this.tsConfigPath);
   }
 
-  watchFiles() {
-    const watcher = chokidar.watch(this.files);
+  watchFiles(files) {
+    const watcher = chokidar.watch(files);
     this.serverless.cli.log('Serverless offline is running. Watching is enabled!');
-    watcher.on('change', (file, stats) => {
+    watcher.on('change',async (file, stats) => {
       if (stats) {
-        this.runBuild(this.tsConfig);
+        await this.runBuild(this.tsConfigPath);
       }
     });
   }
 
-  changeFunctions(pathOut) {
+  changeFunctions() {
     const functions = this.serverless.service.functions;
     const newFunctions = {};
     Object.keys(functions).forEach(fn => {
       newFunctions[fn] = {
         ...functions[fn],
-        handler: functions[fn].handler.replace(`${inDirectory}/`,`${pathOut}/`)
+        handler: functions[fn].handler.replace(`${inDirectory}/`,'dist/')
       }
     });
     this.serverless.service.functions = newFunctions;
   }
 
-  verifyCommands() {
-    const commands = this.serverless.cli.serverless.processedInput.commands;
-    const test = commands.filter(cmd => cmd.indexOf('offline') >= 0);
-    return test.length > 0 ? true : false;
-  }
-
-  async runBuild(options) {
-    await this.ts.run(this.files, options);
+  async runBuild(tsConfigPath = '.') {
+    this.serverless.cli.log('Compiling ...');
+    return execPromise(`tsc -pretty -p ${tsConfigPath}`);
+   
   }
 
   listPaths(dir, filelist = []) {
