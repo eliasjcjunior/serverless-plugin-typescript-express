@@ -1,14 +1,13 @@
 'use strict';
 
-const path = require("path");
-const fs = require("fs");
-const chokidar = require("chokidar");
+const path = require('path');
+const fs = require('fs');
+const chokidar = require('chokidar');
 const inDirectory = 'src';
 const exec = require('child_process').exec;
 
 const execPromise = (command) => {
   return new Promise((resolve, reject) => {
-    console.log(command);
     exec(command, (error, stdout, stderr) => {
       if (stderr) {
         return reject(stderr);
@@ -19,17 +18,16 @@ const execPromise = (command) => {
 }
 
 class ServerlessPluginTypescriptExpress {
-  constructor(serverless, options) {
+  constructor (serverless, options) {
     this.serverless = serverless;
     this.options = options;
-
     this.hooks = {
       'before:offline:start:init': this.start.bind(this),
       'before:package:createDeploymentArtifacts': this.changeFunctions.bind(this)
     }
   }
 
-  async start() {
+  async start () {
     const appPath = this.serverless.config.servicePath;
     const files = this.listPaths(path.join(appPath, inDirectory));
     this.tsConfigPath = `${appPath}\\tsconfig.json`;
@@ -38,17 +36,17 @@ class ServerlessPluginTypescriptExpress {
     await this.runBuild(this.tsConfigPath);
   }
 
-  watchFiles(files) {
+  watchFiles (files) {
     const watcher = chokidar.watch(files);
     this.serverless.cli.log('Serverless offline is running. Watching is enabled!');
-    watcher.on('change',async (file, stats) => {
+    watcher.on('change', async (file, stats) => {
       if (stats) {
         await this.runBuild(this.tsConfigPath);
       }
     });
   }
 
-  changeFunctions() {
+  changeFunctions () {
     const functions = this.serverless.service.functions;
     const newFunctions = {};
     Object.keys(functions).forEach(fn => {
@@ -60,13 +58,12 @@ class ServerlessPluginTypescriptExpress {
     this.serverless.service.functions = newFunctions;
   }
 
-  async runBuild(tsConfigPath = '.') {
+  async runBuild (tsConfigPath = '.') {
     this.serverless.cli.log('Compiling ...');
     return execPromise(`tsc -pretty -p ${tsConfigPath}`);
-   
   }
 
-  listPaths(dir, filelist = []) {
+  listPaths (dir, filelist = []) {
     const files = fs.readdirSync(dir);
 
     files.forEach((file) => {
@@ -79,7 +76,7 @@ class ServerlessPluginTypescriptExpress {
       }
     });
     return filelist.filter(file => file.indexOf('.ts') >= 0);
-  };
+  }
 }
 
 module.exports = ServerlessPluginTypescriptExpress;
