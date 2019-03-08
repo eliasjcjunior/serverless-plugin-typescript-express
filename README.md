@@ -4,7 +4,7 @@
 
 ## Features
 
-   * Integrates with serverless-offline
+   * Integrates with serverless-offline (live reload without restart server)
    * It's not necessary complementary configuration
 
 ## Instalation and use

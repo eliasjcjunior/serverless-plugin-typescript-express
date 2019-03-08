@@ -23,7 +23,7 @@ class ServerlessPluginTypescriptExpress {
     this.serverless = serverless;
     this.options = options;
     this.appPath = this.serverless.config.servicePath;
-    this.tsConfigPath = `${this.appPath}\\tsconfig.json`;
+    this.tsConfigPath = path.join(this.appPath, 'tsconfig.json');
     this.hooks = {
       'before:offline:start:init': this.startLocal.bind(this),
       'before:package:createDeploymentArtifacts': this.startDeploy.bind(this)
